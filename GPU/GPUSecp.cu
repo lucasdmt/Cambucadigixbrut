@@ -100,6 +100,18 @@ GPUSecp::GPUSecp(
   CudaSafeCall(cudaGetLastError());
 }
 
+
+void GPUSecp::updateStrCPU(const char* newStr) {
+    // Copia a nova string para a GPU (sobrescreve a anterior)
+    CudaSafeCall(cudaMemcpy(
+        d_strCPU,          // Destino (GPU)
+        newStr,            // Origem (CPU)
+        65 * sizeof(char), // Tamanho fixo (64 chars + '\0')
+        cudaMemcpyHostToDevice
+    ));
+}
+
+
 //Cuda Secp256k1 Point Multiplication
 //Takes 32-byte privKey + gTable and outputs 64-byte public key [qx,qy]
 __device__ void _PointMultiSecp256k1(uint64_t *qx, uint64_t *qy, uint16_t *privKey, uint8_t *gTableX, uint8_t *gTableY) {
@@ -171,7 +183,10 @@ CudaRunSecp256k1Books(
   int end = start + THREAD_MULT;
   long long result;
 
-  //printf("thread_id %d\n", thread_id);
+  /*if(thread_id == 1){
+      printf("thread_id %d gpukey %s\r", thread_id, str);
+
+  }*/
 
   for (int j = start; j < end; ++j){
     result=result2+j;
@@ -184,8 +199,6 @@ CudaRunSecp256k1Books(
     /*if(result == 4294967295){
       printf("ultimoooo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     }*/
-
-    long long resulttemp = result;
 
 
     // Preenchendo o array de trás para frente
