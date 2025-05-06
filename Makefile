@@ -16,8 +16,8 @@ OBJET = $(addprefix $(OBJDIR)/, \
         CudaBrainSecp.o \
 )
 
-CCAP      = 90
-CUDA	  = /usr/local/cuda-12.4
+CCAP      = 89
+CUDA	  = /usr/local/cuda-12.6
 CXX       = g++
 CXXCUDA   = /usr/bin/g++
 CXXFLAGS  = -DWITHGPU -m64 -mssse3 -Wno-write-strings -O2 -I. -I$(CUDA)/include
