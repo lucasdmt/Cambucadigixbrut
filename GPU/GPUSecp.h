@@ -13,8 +13,8 @@
 
 //CUDA-specific parameters that determine occupancy and thread-count
 //Please read more about them in CUDA docs and adjust according to your GPU specs
-#define BLOCKS_PER_GRID 160   //20
-#define THREADS_PER_BLOCK 256 //256
+#define BLOCKS_PER_GRID 512   //20
+#define THREADS_PER_BLOCK 512 //256
 #define THREAD_MULT 100 //100 quantas seed cada thread vai calcular até terminar a iteração 
 
 
