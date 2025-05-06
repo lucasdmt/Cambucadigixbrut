@@ -16,7 +16,7 @@ OBJET = $(addprefix $(OBJDIR)/, \
         CudaBrainSecp.o \
 )
 
-CCAP      = 75
+CCAP      = 90
 CUDA	  = /usr/local/cuda-12.4
 CXX       = g++
 CXXCUDA   = /usr/bin/g++
