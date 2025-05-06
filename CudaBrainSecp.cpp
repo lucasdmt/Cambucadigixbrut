@@ -225,7 +225,12 @@ void startSecp256k1ModeBooks(uint8_t * gTableXCPU, uint8_t * gTableYCPU, uint64_
 
 		printf("Iteração %d/%d, Tempo: %ld ms, Progresso: %d%%, ETA: %d min %d s\r",iter + 1, maxIteration + 1, iterationDuration, progresso, etaMinutes, etaRemSeconds);
 
-	}    //até aqui
+	}
+	num_combinacoes--;
+	printf("Combinações possíveis: %lu\n", num_combinacoes);
+
+	    //até aqui
+
         
 
         // Encontra o próximo conjunto de índices
