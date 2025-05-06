@@ -80,6 +80,7 @@ public:
     int totalPosicoesCPUtemp     //lucas
 		);
 
+	void updateStrCPU(const char* newStr);  // Novo método para atualizar a string
 	void doIterationSecp256k1Books(int iteration);
 	void doPrintOutput();
 	void doFreeMemory();
