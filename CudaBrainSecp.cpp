@@ -106,14 +106,35 @@ void salvarPosicoes(const char *strCPU, int *posicoesCPU, int *totalPosicoesCPU)
 
 
 
+
 void startSecp256k1ModeBooks(uint8_t * gTableXCPU, uint8_t * gTableYCPU, uint64_t * inputHashBufferCPU) {
 
-
+  //char strCPU[65] = "6123ae95438e22e11b4a116b4c0c3d514ecf6cfede99370cabebf4f282b4228f";
+	char strCPU[65] = "6x2xae9x438e22ex1b4a1x6b4c0c3d5x4ecf6cfede9x3x0cabebf4f282b4228f";
 	int posicoesCPU[65];
 	int totalPosicoesCPUtemp;
 
+	salvarPosicoes(strCPU, posicoesCPU, &totalPosicoesCPUtemp);
 
-	const char* original_key = "6123ae95438e22e11b4a116b4c0c3d514ecf6cfede99370cabebf4f282b4228f";
+	GPUSecp *gpuSecp = new GPUSecp(
+		gTableXCPU,
+		gTableYCPU,
+		inputHashBufferCPU,
+		strCPU,              
+    	posicoesCPU,         
+    	totalPosicoesCPUtemp
+	);
+	long timeTotal = 0;
+	long totalCount = (COUNT_CUDA_THREADS);
+
+	long long possibilidades = pow(10, totalPosicoesCPUtemp)-1;
+	printf("possibilidades %lld \n",possibilidades);
+
+	int itercount = COUNT_CUDA_THREADS * THREAD_MULT;
+	int maxIteration = possibilidades / itercount;
+	printf("cada iteração resulta em %d tentativas, resultando em no maximo de %d iterações \n", itercount, maxIteration);
+
+	const char* original_key = "6123ae95418e22e11b4a116b4c0c3d514ecf6cfede99370cabebf4f282b4228f";
 	    // Configurações
     const int POSICOES_FIXAS[] = {0, 8, 9, 10}; // Índices base 0
     const int TOTAL_POSICOES_FIXAS = 4;
@@ -149,14 +170,14 @@ void startSecp256k1ModeBooks(uint8_t * gTableXCPU, uint8_t * gTableYCPU, uint64_
             num_combinacoes = num_combinacoes * (n - k + i) / i;
         }
     }
-
     printf("Dígitos substituíveis: %d\n", total_digits);
     printf("Combinações possíveis: %lu\n", num_combinacoes);
 
+
     // Buffer para a chave modificada
-    char strCPU[TAMANHO_CHAVE + 1];
-    strncpy(strCPU, original_key, TAMANHO_CHAVE);
-    strCPU[TAMANHO_CHAVE] = '\0';
+    char modified[TAMANHO_CHAVE + 1];
+    strncpy(modified, original_key, TAMANHO_CHAVE);
+    modified[TAMANHO_CHAVE] = '\0';
 
     // Implementação iterativa das combinações
     int indices[TOTAL_SUBSTITUICOES];
@@ -168,39 +189,15 @@ void startSecp256k1ModeBooks(uint8_t * gTableXCPU, uint8_t * gTableYCPU, uint64_
 
     while (indices[0] <= total_digits - TOTAL_SUBSTITUICOES) {
         // Prepara a chave modificada
-        strncpy(strCPU, original_key, TAMANHO_CHAVE);
+        strncpy(modified, original_key, TAMANHO_CHAVE);
         
         // Aplica as substituições
         for (int i = 0; i < TOTAL_SUBSTITUICOES; i++) {
-            strCPU[digit_positions[indices[i]]] = 'x';
+            modified[digit_positions[indices[i]]] = 'x';
         }
         
-        //devemos testar a key aqui variavel strCPU
-
-        salvarPosicoes(strCPU, posicoesCPU, &totalPosicoesCPUtemp);
-        	GPUSecp *gpuSecp = new GPUSecp(
-		gTableXCPU,
-		gTableYCPU,
-		inputHashBufferCPU,
-		strCPU,              
-    	posicoesCPU,         
-    	totalPosicoesCPUtemp
-	);
-
-	long timeTotal = 0;
-	long totalCount = (COUNT_CUDA_THREADS);
-
-	long long possibilidades = pow(10, totalPosicoesCPUtemp)-1;
-	printf("possibilidades %lld \n",possibilidades);
-
-	int itercount = COUNT_CUDA_THREADS * THREAD_MULT;
-	int maxIteration = possibilidades / itercount;
-	printf("cada iteração resulta em %d tentativas, resultando em no maximo de %d iterações \n", itercount, maxIteration);
-	//std::cout << "Pressione ENTER para continuar...";
-	//std::cin.get();
-	printf("Combinações possíveis: %lu\n", num_combinacoes);
-	num_combinacoes--;
-
+        //rodar codigo aqui 
+         gpuSecp->updateStrCPU(modified);
 
 	for (int iter = 0; iter < maxIteration+1; iter++) {
 		const auto clockIter1 = std::chrono::system_clock::now();
@@ -214,7 +211,6 @@ void startSecp256k1ModeBooks(uint8_t * gTableXCPU, uint8_t * gTableYCPU, uint64_
 		timeTotal += iterationDuration;
 
 		totalCount = (itercount * (iter+1));
-		//printf("Cambuca Iteration: %d, time: %ld \n", iter, iterationDuration);
 
 		int restantes = maxIteration - iter;
 		long etaMillis = iterationDuration * restantes;
@@ -226,21 +222,11 @@ void startSecp256k1ModeBooks(uint8_t * gTableXCPU, uint8_t * gTableYCPU, uint64_
 		int progresso = (int)((iter + 1) * 100.0 / (maxIteration + 1));
 		static int lastPrintedPercent = -1;
 
-		/*if (progresso > lastPrintedPercent) {
-			lastPrintedPercent = progresso;
-			printf("Iteração %d/%d, Tempo: %ld ms, Progresso: %d%%, ETA: %d min %d s\r",iter + 1, maxIteration + 1, iterationDuration, progresso, etaMinutes, etaRemSeconds);
-			fflush(stdout);
-		}	*/	
+
 		printf("Iteração %d/%d, Tempo: %ld ms, Progresso: %d%%, ETA: %d min %d s\r",iter + 1, maxIteration + 1, iterationDuration, progresso, etaMinutes, etaRemSeconds);
 
-	}
-
-	printf("Finished in %ld milliseconds (%.2f seconds)\n", timeTotal, timeTotal / 1000.0);
-
-	printf("Total Seed Count: %lld \n", possibilidades);
-
-	printf("Seeds Per Second: %0.2lf Mkeys\n", possibilidades / (double)(timeTotal * 1000));
-
+	}    //até aqui
+        
 
         // Encontra o próximo conjunto de índices
         int t = TOTAL_SUBSTITUICOES - 1;
@@ -257,7 +243,11 @@ void startSecp256k1ModeBooks(uint8_t * gTableXCPU, uint8_t * gTableYCPU, uint64_
             indices[j] = indices[j-1] + 1;
         }
     }
+	printf("Finished in %ld milliseconds (%.2f seconds)\n", timeTotal, timeTotal / 1000.0);
+	printf("Total Seed Count: %lld \n", possibilidades);
+	printf("Seeds Per Second: %0.2lf Mkeys\n", possibilidades / (double)(timeTotal * 1000));
 }
+
 
 void increaseStackSizeCPU() {
 	const rlim_t cpuStackSize = SIZE_CPU_STACK;
