@@ -136,8 +136,8 @@ void startSecp256k1ModeBooks(uint8_t * gTableXCPU, uint8_t * gTableYCPU, uint64_
 
 	const char* original_key = "6123ae95418e22e11b4a116b4c0c3d514ecf6cfede99370cabebf4f282b4228f";
 	    // Configurações
-    const int POSICOES_FIXAS[] = {0, 8, 9, 10}; // Índices base 0
-    const int TOTAL_POSICOES_FIXAS = 4;
+    const int POSICOES_FIXAS[] = {0, 1, 8, 9, 10}; // Índices base 0
+    const int TOTAL_POSICOES_FIXAS = 5;
     const int TOTAL_SUBSTITUICOES = 8;
     const int TAMANHO_CHAVE = 64;
 
